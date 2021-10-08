@@ -1,8 +1,11 @@
 package com.phantom.automath
 
+import android.content.Context
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,12 +37,16 @@ import com.phantom.automath.ui.theme.AutoMathTheme
 import com.phantom.automath.ui.theme.CARDCOLOR
 import java.lang.NumberFormatException
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.phantom.automath.ui.Screen.MainDrawerContent
 import com.phantom.automath.ui.composables.ExpandableCard
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     val itemslist = listOf('A', 'B', 'C', 'D', 'e', 'f')
+
     val expression_font_family = FontFamily(
         Font(R.font.saira_regular, FontWeight.Normal),
         Font(R.font.saira_bold, FontWeight.Bold)
@@ -57,23 +66,28 @@ class MainActivity : ComponentActivity() {
       }
     }
 
+    @ExperimentalComposeUiApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val database_handler = AlgebraDatabaseHandler(this)
+        val commonData = CommonData(this, database_handler)
         setContent {
             AutoMathTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    Navigation()
+                    Navigation(commonData = commonData)
                 }
             }
         }
     }
+
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
-fun ScaffoldMainScreen(navigation: NavHostController){
+fun ScaffoldMainScreen(navigation: NavHostController, inputValue: String? = null, databaseHandler: AlgebraDatabaseHandler){
     var scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -104,16 +118,24 @@ fun ScaffoldMainScreen(navigation: NavHostController){
             )
         },
         scaffoldState = scaffoldState,
-        drawerContent = { ExpandableCard(title = "2x + y", description = "This is simple equation") },
-        content = {MainScreen(navigation = navigation)}
+        drawerContent = { MainDrawerContent(navigation = navigation, database = databaseHandler) },
+        content = {
+            if(inputValue != null)
+                MainScreen(navigation = navigation, inputValue = inputValue)
+            else
+                MainScreen(navigation = navigation, inputValue = "")
+        }
     )
 }
 
+@ExperimentalComposeUiApi
 @Composable
-fun MainScreen(navigation: NavHostController){
+fun MainScreen(navigation: NavHostController, inputValue: String){
     Column(modifier = Modifier.padding(20.dp)) {
 
-        val text = remember { mutableStateOf<String>("") }
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        val text = remember { mutableStateOf<String>(inputValue) }
         val output  = remember { mutableStateOf<String>("") }
         val var_list = remember { mutableStateOf(listOf<Pair<Char, MutableState<String>>>())}
 
@@ -192,21 +214,29 @@ fun MainScreen(navigation: NavHostController){
                     Text("Plug-In")
                 }
                 Spacer(modifier = Modifier.padding(10.dp))
+
+                val simplify_coroutine = rememberCoroutineScope()
                 Button(
                     onClick = {
-                        val expresssion_stream = ExpressionStream(text.value)
-                        var each_double: Double
-                        for(each_pair in var_list.value){
-                            try{
-                                each_double = each_pair.second.value.toDouble()
-                                expresssion_stream.addSubtitute(each_pair.first, each_double)
+                        simplify_coroutine.launch {
+                            val expresssion_stream = ExpressionStream(text.value)
+                            var each_double: Double
+                            for (each_pair in var_list.value) {
+                                try {
+                                    each_double = each_pair.second.value.toDouble()
+                                    expresssion_stream.addSubtitute(each_pair.first, each_double)
+                                } catch (e: NumberFormatException) {
+                                    continue
+                                }
                             }
-                            catch (e: NumberFormatException){
-                                continue
-                            }
-                        }
+                            keyboardController?.hide()
+                            output.value = "The expression is being calculated.. Please Wait"
 //                                        output.value = PseudoStream.calculate(text.value)
-                        output.value = expresssion_stream.simplify_output()
+                            output.value = "=> " + expresssion_stream.simplify_output()
+                                .replace("\n", "\n=> ")
+                                .replaceAfterLast("\n", "")
+                        }
+
                     },
                     modifier = Modifier
                         .fillMaxWidth(1f)
@@ -232,7 +262,22 @@ fun MainScreen(navigation: NavHostController){
                         backgroundColor = Color(0xfffaa0a0),
                         contentColor = Color.Black
                     )) {
-                    Text("Save")
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .padding(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Create,
+                            contentDescription = "Delete Expression",
+                            tint = Color.DarkGray
+                        )
+                        Text(
+                            "Save",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -253,7 +298,10 @@ fun MainScreen(navigation: NavHostController){
             Text(
                 output.value,
                 modifier = Modifier.padding(20.dp),
-                color = Color.Black
+                color = Color.Black,
+                lineHeight = 30.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
             )
         }
     }
@@ -272,11 +320,12 @@ fun EachSubtitute(name: Char, text: MutableState<String>){
             onValueChange = { text.value = it },
             modifier = Modifier
                 .height(25.dp)
-                .background(Color.LightGray),
+                .background(Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
-            )
+            ),
+//            textStyle = TextStyle.Default.copy(background = Color.White)
 
         )
     }

@@ -1,6 +1,10 @@
 package com.phantom.automath.ui.Screen
 
+import android.annotation.SuppressLint
+import android.database.Cursor
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -8,16 +12,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.phantom.automath.*
 import com.phantom.automath.ui.composables.ExpandableCard
 
 @ExperimentalMaterialApi
 @Composable
-fun AlgebraCreator(input_value: String?){
-	val algebra_input = remember{ mutableStateOf("") }
+fun AlgebraCreator(navigation: NavHostController, input_value: String? = null, db: AlgebraDatabaseHandler){
+	var temp_str = ""
 	if(input_value != null)
-		algebra_input.value = input_value
+		temp_str = input_value.toString()
 
+	val algebra_input = remember{ mutableStateOf(temp_str) }
 	val description_input = remember { mutableStateOf("")}
+
+	val cursor = remember { mutableStateOf(db.getDataCursor())}
 	
 	Column() {
 		Spacer(modifier = Modifier.height(40.dp))
@@ -61,7 +70,14 @@ fun AlgebraCreator(input_value: String?){
 			horizontalArrangement = Arrangement.SpaceBetween
 		){
 			Button(
-				onClick = { /*TODO*/ },
+				onClick =
+				{
+					navigation.navigate(Screen.MainScreen.route) {
+						popUpTo(Screen.AlgebraCreator.route) {
+						inclusive = true
+						}
+					}
+				},
 				colors = ButtonDefaults.buttonColors(
 					backgroundColor = Color(0xfffaa0a0),
 					contentColor = Color.Black
@@ -74,7 +90,18 @@ fun AlgebraCreator(input_value: String?){
 				)
 			}
 			Button(
-				onClick = { /*TODO*/ },
+				onClick =
+				{
+					if(ExpressionStream.isValidExpression(algebra_input.value)){
+						if(algebra_input.value.length < 255 && description_input.value.length < 255)
+							db.insertData(algebra_input.value, description_input.value)
+					}
+					navigation.navigate(Screen.MainScreen.withArgs(algebra_input.value)) {
+						popUpTo(Screen.AlgebraCreator.route) {
+							inclusive = true
+						}
+					}
+				},
 				colors = ButtonDefaults.buttonColors(
 					backgroundColor = Color(0xfffaa0a0),
 					contentColor = Color.Black
@@ -88,6 +115,31 @@ fun AlgebraCreator(input_value: String?){
 			}
 		}
 
-		ExpandableCard(title = "2x + y", description = "This is simple equation")
+//		Button(onClick = { db.clear_table() }) {
+//			Text(db.getDataCursor().count.toString())
+//		}
+//		Button(onClick = { cursor.value = db.getDataCursor() }) {
+//			Text("Read Data")
+//		}
+//
+//		LazyColumn(state = rememberLazyListState()){
+//			cursor.value.moveToFirst()
+//			items(cursor.value.count){
+//				DisplayAlgebra(cursor = cursor.value)
+//				cursor.value.moveToNext()
+////                Text("${it.expression} : ${it.description}")
+//			}
+//		}
 	}
+}
+
+@SuppressLint("Range")
+@Composable
+fun DisplayAlgebra(cursor: Cursor){
+	val algebra = Algebra(
+		0,
+		cursor.getString(cursor.getColumnIndex(AlgebraTable.expression)),
+		cursor.getString(cursor.getColumnIndex(AlgebraTable.description))
+	)
+	Text("${algebra.id} : ${algebra.expression} : ${algebra.description}")
 }

@@ -39,14 +39,8 @@ class ExpressionStream(var expression: String) {
 		subtitute_set = HashSet()
 	}
 
-}
-
-class PseudoStream{
-	companion object {
-		external fun calculate(expression: String): String
-		external fun output(input: String): String
-		fun output_nonative(input: String): String {
-			return input + "(Modified by Kotlin)"
-		}
+	companion object{
+		external fun isValidExpression(expression: String): Boolean
 	}
+
 }

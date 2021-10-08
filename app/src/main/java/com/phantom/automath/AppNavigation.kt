@@ -1,7 +1,9 @@
 package com.phantom.automath
 
+import android.content.Context
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,13 +27,31 @@ sealed class Screen(val route: String){
 	}
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
-fun Navigation() {
+fun Navigation(commonData: CommonData) {
 	var navController = rememberNavController()
 	NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
 		composable(route = Screen.MainScreen.route) {
-			ScaffoldMainScreen(navigation = navController)
+			ScaffoldMainScreen(
+				navigation = navController,
+				databaseHandler = commonData.algebraDatabase)
+		}
+		composable(
+			route = Screen.MainScreen.route + "/{expression}",
+			arguments = listOf(
+				navArgument("expression"){
+					type = NavType.StringType
+					defaultValue = ""
+					nullable = true
+				}
+			)
+		){
+			ScaffoldMainScreen(
+				navigation = navController,
+				inputValue = it.arguments?.getString("expression"),
+				databaseHandler = commonData.algebraDatabase)
 		}
 		composable(
 			route = Screen.AlgebraCreator.route + "/{expression}",
@@ -43,11 +63,16 @@ fun Navigation() {
 				}
 			)
 		){
-			AlgebraCreator(input_value = it.arguments?.getString("expression"))
+			AlgebraCreator(
+				navigation = navController,
+				input_value = it.arguments?.getString("expression"),
+				db = commonData.algebraDatabase)
 		}
 
 		composable(route = Screen.AlgebraCreator.route){
-			AlgebraCreator(null)
+			AlgebraCreator(
+				navigation = navController,
+				db = commonData.algebraDatabase)
 		}
 
 	}

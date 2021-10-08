@@ -97,26 +97,13 @@ Java_com_phantom_automath_ExpressionStream_invoke_1simplify_1stream(JNIEnv *env,
     }
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_phantom_automath_PseudoStream_00024Companion_calculate(JNIEnv *env, jobject thiz, jstring expression_) {
-    // TODO: implement calculate()
-    std::string expression = jstringtostring(env, expression_);
-    Operand operand{expression};
-    if(operand){
-        if(operand.is_expression()){
-            Expression exp{operand.get<Expression>()};
-            std::ostringstream stream_;
-            exp.simplify(stream_);
-            return Create_Java_String(env, stream_.str());
-        }
-
-    }
-    return Create_Java_String(env, "The expression is invalid ...");
-}
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_phantom_automath_PseudoStream_00024Companion_output(JNIEnv *env, jobject thiz, jstring input) {
-    // TODO: implement output()
-    std::string expression = jstringtostring(env, input);
-    return Create_Java_String(env, expression + " (Modified by C++)");
+JNIEXPORT jboolean JNICALL
+Java_com_phantom_automath_ExpressionStream_00024Companion_isValidExpression(JNIEnv *env,
+                                                                            jobject thiz,
+                                                                            jstring expression) {
+    // TODO: implement isValidExpression()
+    std::string expression_ = jstringtostring(env, expression);
+    if(Operand{expression_})
+        return true;
+    return false;
 }
