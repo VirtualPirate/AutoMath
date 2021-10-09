@@ -7,6 +7,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.widget.Toast
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
 const val DATABASE_NAME = "DATABASE"
 const val TABLE_NAME = "ALGEBRA_TABLE"
@@ -63,6 +64,37 @@ class AlgebraDatabaseHandler(var context: Context): SQLiteOpenHelper(context, DA
 			while (result.moveToNext())
 		}
 		return list
+	}
+
+	@SuppressLint("Range")
+	fun readDataSnapshot(): SnapshotStateList<Algebra> {
+		val list: SnapshotStateList<Algebra> = SnapshotStateList()
+		val db = this.readableDatabase
+		val query = "Select * from $TABLE_NAME"
+		val result = db.rawQuery(query, null)
+		if (result.moveToFirst()) {
+			do {
+				val algebra = Algebra(
+					result.getInt(result.getColumnIndex(AlgebraTable.primary_id)),
+					result.getString(result.getColumnIndex(AlgebraTable.expression)),
+					result.getString(result.getColumnIndex(AlgebraTable.description))
+				)
+//                user.id = result.getString(result.getColumnIndex(AlgebraTable.primary_id)).toInt()
+
+				list.add(algebra)
+			}
+			while (result.moveToNext())
+		}
+		return list
+	}
+
+	@SuppressLint("Range")
+	fun getLastId(): Int {
+		val db = this.readableDatabase
+		val query = "Select * from $TABLE_NAME"
+		val result = db.rawQuery(query, null)
+		result.moveToLast()
+		return result.getInt(result.getColumnIndex(AlgebraTable.primary_id))
 	}
 
 	fun getDataCursor(): Cursor {

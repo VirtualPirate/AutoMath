@@ -36,7 +36,8 @@ fun Navigation(commonData: CommonData) {
 		composable(route = Screen.MainScreen.route) {
 			ScaffoldMainScreen(
 				navigation = navController,
-				databaseHandler = commonData.algebraDatabase)
+				databaseHandler = commonData.algebraDatabase,
+				drawerList = commonData.drawerList)
 		}
 		composable(
 			route = Screen.MainScreen.route + "/{expression}",
@@ -51,7 +52,8 @@ fun Navigation(commonData: CommonData) {
 			ScaffoldMainScreen(
 				navigation = navController,
 				inputValue = it.arguments?.getString("expression"),
-				databaseHandler = commonData.algebraDatabase)
+				databaseHandler = commonData.algebraDatabase,
+				drawerList = commonData.drawerList)
 		}
 		composable(
 			route = Screen.AlgebraCreator.route + "/{expression}",
@@ -66,13 +68,15 @@ fun Navigation(commonData: CommonData) {
 			AlgebraCreator(
 				navigation = navController,
 				input_value = it.arguments?.getString("expression"),
-				db = commonData.algebraDatabase)
+				db = commonData.algebraDatabase,
+				drawerList = commonData.drawerList)
 		}
 
 		composable(route = Screen.AlgebraCreator.route){
 			AlgebraCreator(
 				navigation = navController,
-				db = commonData.algebraDatabase)
+				db = commonData.algebraDatabase,
+				drawerList = commonData.drawerList)
 		}
 
 	}

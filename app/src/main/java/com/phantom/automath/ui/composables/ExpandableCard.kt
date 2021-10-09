@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,7 +50,7 @@ fun ExpandableCard(
     padding: Dp = 12.dp,
     navigation: NavHostController,
     databaseHandler: AlgebraDatabaseHandler,
-    cursor: MutableState<Cursor>
+    drawerList: SnapshotStateList<Algebra>
 ) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -127,7 +128,8 @@ fun ExpandableCard(
                 Button(
                     onClick = {
                         databaseHandler.deleteById(algebra.id)
-                        cursor.value = databaseHandler.getDataCursor()
+                        drawerList.remove(algebra)
+                        //cursor.value = databaseHandler.getDataCursor()
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color(0xfffaa0a0),

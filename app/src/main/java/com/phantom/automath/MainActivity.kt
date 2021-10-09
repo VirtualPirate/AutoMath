@@ -37,6 +37,7 @@ import com.phantom.automath.ui.theme.AutoMathTheme
 import com.phantom.automath.ui.theme.CARDCOLOR
 import java.lang.NumberFormatException
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.phantom.automath.ui.Screen.MainDrawerContent
@@ -70,12 +71,15 @@ class MainActivity : ComponentActivity() {
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val database_handler = AlgebraDatabaseHandler(this)
-        val commonData = CommonData(this, database_handler)
+        //val database_handler = AlgebraDatabaseHandler(this)
+        //val commonData = CommonData(this, database_handler)
         setContent {
             AutoMathTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
+                    val database_handler = remember {AlgebraDatabaseHandler(this)}
+                    val drawerList = remember{database_handler.readDataSnapshot()}
+                    val commonData = remember{CommonData(this, database_handler, drawerList)}
                     Navigation(commonData = commonData)
                 }
             }
@@ -87,7 +91,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
-fun ScaffoldMainScreen(navigation: NavHostController, inputValue: String? = null, databaseHandler: AlgebraDatabaseHandler){
+fun ScaffoldMainScreen(navigation: NavHostController, inputValue: String? = null, databaseHandler: AlgebraDatabaseHandler, drawerList: SnapshotStateList<Algebra>){
     var scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
@@ -118,7 +122,7 @@ fun ScaffoldMainScreen(navigation: NavHostController, inputValue: String? = null
             )
         },
         scaffoldState = scaffoldState,
-        drawerContent = { MainDrawerContent(navigation = navigation, database = databaseHandler) },
+        drawerContent = { MainDrawerContent(navigation = navigation, database = databaseHandler, drawerList = drawerList) },
         content = {
             if(inputValue != null)
                 MainScreen(navigation = navigation, inputValue = inputValue)

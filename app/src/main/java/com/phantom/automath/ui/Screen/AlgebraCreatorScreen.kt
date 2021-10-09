@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,7 @@ import com.phantom.automath.ui.composables.ExpandableCard
 
 @ExperimentalMaterialApi
 @Composable
-fun AlgebraCreator(navigation: NavHostController, input_value: String? = null, db: AlgebraDatabaseHandler){
+fun AlgebraCreator(navigation: NavHostController, input_value: String? = null, db: AlgebraDatabaseHandler, drawerList: SnapshotStateList<Algebra>){
 	var temp_str = ""
 	if(input_value != null)
 		temp_str = input_value.toString()
@@ -93,8 +94,10 @@ fun AlgebraCreator(navigation: NavHostController, input_value: String? = null, d
 				onClick =
 				{
 					if(ExpressionStream.isValidExpression(algebra_input.value)){
-						if(algebra_input.value.length < 255 && description_input.value.length < 255)
+						if(algebra_input.value.length < 255 && description_input.value.length < 255){
 							db.insertData(algebra_input.value, description_input.value)
+							drawerList.add(Algebra(db.getLastId() ,algebra_input.value, description_input.value))
+						}
 					}
 					navigation.navigate(Screen.MainScreen.withArgs(algebra_input.value)) {
 						popUpTo(Screen.AlgebraCreator.route) {
