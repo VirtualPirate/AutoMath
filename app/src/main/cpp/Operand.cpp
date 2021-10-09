@@ -531,7 +531,7 @@ const Operand& Operand::getPower() const {
 	if (index > -1)
 		return get_power_functions[index](this);
 	std::cout << "stdout: Operand::getPower() on nulltype" << std::endl;
-	return Constant::power_null;
+	return CONSTANTS::NULL_OPERAND;
 
 }
 void Operand::setPower(const Operand& pow){
@@ -587,7 +587,7 @@ Operand Operand::simplify() const {
 	int index = (int)type;
 	if (index > -1){
 		//If power is 0 then return 1
-		if(getPower() == Constant::power_zero)
+		if(getPower() == CONSTANTS::ZERO)
 			return (double)1;
 		return simplify_functions[index](this);
 	}
@@ -601,6 +601,14 @@ Operand Operand::subtitute(const Variable_Subtitutor_List& list) const {
 	//std::cout << "stdout: Subtitution on a NULL_OPERAND";
 	return CONSTANTS::NULL_OPERAND;
 }
+Operand Operand::multiplicative_inverse() const {
+	return this->raise_pow(CONSTANTS::MINUS_ONE);
+}
+
+Operand Operand::additive_inverse() const {
+	return this->operator*(CONSTANTS::MINUS_ONE);
+}
+
 std::ostream& operator<<(std::ostream& os, const Operand& ref){
 	if(!ref.is_null){
 		int index = (int)ref.type;

@@ -10,9 +10,7 @@
 #include "Term.hpp"
 #include "Expression.hpp"
 #include "Parser.hpp"
-
-#include "Tests.hpp"
-
+#include "Operation_Functions.hpp"
 
 std::ostream& operator<<(std::ostream& os, Token const& v) {
 	std::visit([&os](auto const& e) {os << e; }, v);
@@ -314,15 +312,24 @@ Operand Parser::Parse_Expression(TokensConstIterator begin, TokensConstIterator 
 				group_iter = Parser::grab_group(first, second);
 				fields.push_back(Parse_Expression(group_iter.first, group_iter.second, true));
 				first = group_iter.second;
+				//std::cout << "remaining = ";
+				//test::print_constiteratorpair({ first, second });
 				continue;
 			}
 			else if (*first == '^') {
 				OperandAndTokensIterator power_return = Parser::match_power(first, second);
 				//std::cout << "power_return -> " << *(power_return.second) << std::endl;
+				//std::cout << "power_return -> " << power_return.first << std::endl;
 				//test::print_constiteratorpair({ first, power_return.second });
 				//std::cout << "set power n return = " << fields.back().setPowerN_return(power_return.first) << std::endl;
 				//std::cout << "power return + 1 -> " << *(power_return.second + 1) << std::endl;;
-				fields.back().setPower(power_return.first);
+				if (fields.back().getPower() == CONSTANTS::ONE)
+					fields.back().setPower(power_return.first);
+				else {
+					Term temp{ fields.back() };
+					temp.setPower(power_return.first);
+					fields.back() = temp;
+				}
 				//std::cout << "fields.back() = " << fields.back() << std::endl;
 				first = power_return.second;
 				continue;
@@ -344,7 +351,7 @@ Operand Parser::Parse_Expression(TokensConstIterator begin, TokensConstIterator 
 
 Operand Parser::Parse_Expression(const std::string& expression) {
 	Parser parser{ expression };
-	if(parser.tokens.size() > 0)
+	if (parser.tokens.size() > 0)
 		return Parser::Parse_Expression(parser.tokens.cbegin(), parser.tokens.cend());
 	else
 		return Operand{};
@@ -478,7 +485,12 @@ TokensConstIteratorPair Parser::grab_term(TokensConstIterator begin, TokensConst
 			}
 			if (Parser::is_leftbrace(*begin))
 				begin = Parser::grab_group(begin, end).second;
-			group.second = begin + 1;
+			if (begin < end)
+				group.second = begin + 1;
+			else {
+				group.second = begin;
+				break;
+			}
 		}
 		else 
 			return group;

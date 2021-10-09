@@ -7,6 +7,7 @@
 #include <optional>
 #include <unordered_map>
 #include <vector>
+#include "Tests.hpp"
 
 using Token = std::variant<double, char>;
 using TokensConstIterator = std::vector<Token>::const_iterator;

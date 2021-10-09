@@ -172,6 +172,8 @@ public:
 	Operand substitute() const;
 	Operand simplify() const;
 	Operand subtitute(const Variable_Subtitutor_List&) const;
+	Operand multiplicative_inverse() const;
+	Operand additive_inverse() const;
 
 	// Operand to Operand arithmetic operators
 	Operand operator+(const Operand&) const;

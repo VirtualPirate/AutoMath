@@ -21,9 +21,7 @@ class Constant{
 public:
 	static Constant const ONE;
 	static Constant const ZERO;
-	static Operand const power_one;
-	static Operand const power_zero;
-	static Operand const power_null;
+
 	//Constructors
 	Constant(void);
 	Constant(double);
@@ -120,8 +118,10 @@ public:
 
 
 	//Unary operators 
-	Constant operator+() const;
-	Constant operator-() const;
+	Operand operator+() const;
+	Operand operator-() const;
+
+	Operand multiplicative_inverse() const;
 
 	friend std::ostream& operator<<(std::ostream&, const Constant&);
 

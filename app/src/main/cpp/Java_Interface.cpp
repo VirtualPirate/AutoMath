@@ -103,7 +103,5 @@ Java_com_phantom_automath_ExpressionStream_00024Companion_isValidExpression(JNIE
                                                                             jstring expression) {
     // TODO: implement isValidExpression()
     std::string expression_ = jstringtostring(env, expression);
-    if(Operand{expression_})
-        return true;
-    return false;
+    return Parser::is_valid_expression(expression_);
 }

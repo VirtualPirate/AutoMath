@@ -29,7 +29,7 @@ public:
 class Variable_Subtitutor_List { 
 	std::vector<Variable_Subtitutor> subtitute;
 public:
-	Variable_Subtitutor_List();
+	Variable_Subtitutor_List() = default;
 	Variable_Subtitutor_List(std::initializer_list<Variable_Subtitutor>);
 	Variable_Subtitutor_List& operator=(std::initializer_list<Variable_Subtitutor>);
 

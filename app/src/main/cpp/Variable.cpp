@@ -14,7 +14,6 @@
 
 #include "Tests.hpp"
 
-
 std::unordered_map<char, Constant> var_values;
 
 //Copy Assignment operator
@@ -125,6 +124,13 @@ bool Variable::is_negative() const {
 bool Variable::negative_power() const {
 	return power.is_negative();
 }
+
+
+Operand Variable::operator+() const { return *this; }
+Operand Variable::operator-() const { return *this * CONSTANTS::MINUS_ONE; }
+
+Operand Variable::multiplicative_inverse() const { return this->raise_pow(CONSTANTS::MINUS_ONE); }
+
 std::ostream& operator<<(std::ostream& os, const Variable& ref){
 	if(ref.power == Operand{Constant{1}})
 		os << ref.name;

@@ -15,9 +15,7 @@
 
 Constant const Constant::ONE{ 1 };
 Constant const Constant::ZERO{ 0.0 };
-Operand const Constant::power_one{(double)1};
-Operand const Constant::power_zero{(double)0};
-Operand const Constant::power_null{};
+
 //Constructors
 Constant::Constant(void):value{0}{}
 Constant::Constant(double val) : value{ val }, power{}{CONSTANT_LOG_CONSTRUCT(); }
@@ -98,22 +96,24 @@ const double& Constant::getBase() const {
 const Operand& Constant::getPower() const {
 	if(power)
 		return power;
-	return power_one;
+	return CONSTANTS::ONE;
 }
 
 void Constant::setValue(const double& ref){
 	value = ref;
 }
 void Constant::setPower(const Operand& ref){
-	if(ref == power_one)
+	if(ref == CONSTANTS::ONE)
 		power = Operand{};
 	else
 		power = ref;
 }
 
 
-Constant Constant::operator+() const {return +value;}
-Constant Constant::operator-() const {return -value;}
+Operand Constant::operator+() const {return *this;}
+Operand Constant::operator-() const {return *this * CONSTANTS::MINUS_ONE;}
+
+Operand Constant::multiplicative_inverse() const { return this->raise_pow(CONSTANTS::MINUS_ONE); }
 
 Constant::~Constant() {
 	CONSTANT_LOG_DESTRUCT();

@@ -15,7 +15,6 @@
 
 #include "Tests.hpp"
 
-
 Term::Term(const Term& lvalue) : OperandList(lvalue) {}
 Term& Term::operator=(const Term& lvalue) {
 	OperandList::operator=(lvalue);

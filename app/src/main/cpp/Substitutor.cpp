@@ -5,9 +5,6 @@
 #include "Operation_Functions.hpp"
 #include <cstdlib>
 
-#include "Tests.hpp"
-
-
 Variable_Subtitutor::Variable_Subtitutor() : name{ '\0' }, value{ 0.0 }{}
 
 Variable_Subtitutor::Variable_Subtitutor(char name_, double value_) {
@@ -42,7 +39,7 @@ double Variable_Subtitutor::getValue() const { return value; }
 
 
 
-Variable_Subtitutor_List::Variable_Subtitutor_List(): subtitute{}{}
+
 Variable_Subtitutor_List::Variable_Subtitutor_List(std::initializer_list<Variable_Subtitutor> list) : subtitute{} { this->extend(list); }
 Variable_Subtitutor_List& Variable_Subtitutor_List::operator=(std::initializer_list<Variable_Subtitutor> list) {
 	subtitute = std::vector<Variable_Subtitutor>{};
@@ -246,5 +243,5 @@ const Operand& Substitutor_List::get_substitute(const Substitutor& ref) const{
 	if(iter != sub_.end())
 		return iter->substitute;
 	else
-		return Constant::power_null;
+		return CONSTANTS::NULL_OPERAND;
 }

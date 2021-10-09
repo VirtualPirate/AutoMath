@@ -14,7 +14,6 @@
 #include "Tests.hpp"
 
 
-
 Expression::Expression(const Expression& lvalue) : OperandList(lvalue), is_subexpression{ lvalue.is_subexpression }{}
 Expression& Expression::operator=(const Expression& lvalue) {
 	OperandList::operator=(lvalue);
@@ -139,14 +138,17 @@ void Expression::remove_zeroes() {
 
 void Expression::constant_raise_power() {
 	if (power.is_constant()) {
-		double power_value = power.get<Constant>().value;
-		if (power_value == (int)power_value && power_value > 1) {
-			power = CONSTANTS::ONE;
-			*this = expression_constant_power(*this, (int)power_value);
-		}
-		else if (power_value == (int)power_value && power_value < -1) {
-			power = CONSTANTS::MINUS_ONE;
-			*this = expression_constant_power_minus(*this, (int)power_value);
+		Operand power_simplified{ power.simplify() };
+		if (power_simplified.getPower() == CONSTANTS::ONE) {
+			double power_value = power.simplify().get<Constant>().value;
+			if (power_value == (int)power_value && power_value > 1) {
+				power = CONSTANTS::ONE;
+				*this = expression_constant_power(*this, (int)power_value);
+			}
+			else if (power_value == (int)power_value && power_value < -1) {
+				power = CONSTANTS::MINUS_ONE;
+				*this = expression_constant_power_minus(*this, (int)power_value);
+			}
 		}
 	}
 }
