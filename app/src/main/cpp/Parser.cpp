@@ -361,9 +361,9 @@ void Parser::create_tokens(){
 	std::optional<double> number_match;
 	std::optional<char> char_match;
 	while(current_index < context.size()){
-		if((number_match = match_number()))
+		if(number_match = match_number())
 			tokens.push_back(number_match.value());
-		else if((char_match = match_char()))
+		else if(char_match = match_char())
 			tokens.push_back(char_match.value());
 		else
 			throw std::runtime_error{"Parser::create_tokens(): Invalid token. Can't be parsed"};

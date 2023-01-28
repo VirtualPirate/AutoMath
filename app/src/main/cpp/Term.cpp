@@ -133,7 +133,7 @@ void Term::simplify_internal_terms() {
 
 void Term::remove_ones() {
 	for (auto each = 0; each < fields.size();) {
-		if (fields.at(each).is_constant() && fields.at(each) == CONSTANTS::ONE)
+		if (fields.at(each).is_constant() && fields.at(each) == CONSTANTS::ONE && fields.size() > 1)
 			fields.erase(fields.cbegin() + each);
 		else
 			each++;

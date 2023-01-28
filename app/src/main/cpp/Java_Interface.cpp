@@ -86,7 +86,7 @@ Java_com_phantom_automath_ExpressionStream_invoke_1simplify_1stream(JNIEnv *env,
                 return Create_Java_String(env, stream_.str());
             }
             else{
-                Operand result{operand.simplify()};
+                Operand result{operand.subtitute(subtitute_list).simplify()};
                 std::ostringstream stream_;
                 stream_ << result;
                 return Create_Java_String(env, stream_.str());

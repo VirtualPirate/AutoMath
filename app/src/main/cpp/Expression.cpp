@@ -129,7 +129,7 @@ void Expression::simplify_internal_expressions() {
 
 void Expression::remove_zeroes() {
 	for (auto each = fields.begin(); each != fields.end(); ) {
-		if (each->is_constant() && *each == CONSTANTS::ZERO)
+		if (each->is_constant() && *each == CONSTANTS::ZERO && fields.size() > 1)
 			fields.erase(each);
 		else
 			each++;
@@ -270,7 +270,7 @@ void Expression::remove_zeroes(std::ostringstream& output) {
 	std::string prev_output = get_cout_string(*this);
 
 	for (auto each = fields.begin(); each != fields.end(); ) {
-		if (each->is_constant() && *each == CONSTANTS::ZERO)
+		if (each->is_constant() && *each == CONSTANTS::ZERO && fields.size() > 1)
 			fields.erase(each);
 		else
 			each++;
@@ -286,14 +286,17 @@ void Expression::constant_raise_power(std::ostringstream& output) {
 	std::string prev_output = get_cout_string(*this);
 
 	if (power.is_constant()) {
-		double power_value = power.get<Constant>().value;
-		if (power_value == (int)power_value && power_value > 1) {
-			power = CONSTANTS::ONE;
-			*this = expression_constant_power(*this, (int)power_value);
-		}
-		else if (power_value == (int)power_value && power_value < -1) {
-			power = CONSTANTS::MINUS_ONE;
-			*this = expression_constant_power_minus(*this, (int)power_value);
+		Operand power_simplified{ power.simplify() };
+		if (power_simplified.getPower() == CONSTANTS::ONE) {
+			double power_value = power.simplify().get<Constant>().value;
+			if (power_value == (int)power_value && power_value > 1) {
+				power = CONSTANTS::ONE;
+				*this = expression_constant_power(*this, (int)power_value);
+			}
+			else if (power_value == (int)power_value && power_value < -1) {
+				power = CONSTANTS::MINUS_ONE;
+				*this = expression_constant_power_minus(*this, (int)power_value);
+			}
 		}
 	}
 
